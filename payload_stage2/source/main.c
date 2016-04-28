@@ -1,10 +1,11 @@
 #include "types.h"
+#include "memory.h"
 #include "i2c.h"
 #include "fatfs/ff.h"
 #include "../build/bundled.h"
 
 #define PAYLOAD_ADDRESS 0x23F00000
-#define A11_PAYLOAD_LOC 0x1FFF4C80 //keep in mind this needs to be changed in the ld script for arm11 too
+#define A11_PAYLOAD_LOC 0x1FFF4C80 //Keep in mind this needs to be changed in the ld script for arm11 too
 #define A11_ENTRY       0x1FFFFFF8
 
 static void ownArm11(void)
@@ -20,15 +21,16 @@ static void ownArm11(void)
 void main(void)
 {
     FATFS fs;
-    FIL payload;
-    unsigned int br;
 
     f_mount(&fs, "0:", 0); //This never fails due to deferred mounting
+
+    FIL payload;
 
     if(f_open(&payload, "arm9loaderhax.bin", FA_READ) == FR_OK)
     {
         ownArm11();
-        f_read(&payload, (void *)PAYLOAD_ADDRESS, f_size(&payload), &br);
+        unsigned int read;
+        f_read(&payload, (void *)PAYLOAD_ADDRESS, f_size(&payload), &read);
         ((void (*)())PAYLOAD_ADDRESS)();
     }
 
